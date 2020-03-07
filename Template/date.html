@@ -1,0 +1,48 @@
+<script type="text/javascript">
+document.writeln("<p>");
+var thisdate = new Date();
+
+document.writeln(thisdate+"<br>");
+
+var thisyear = thisdate.getFullYear();
+
+document.writeln(thisyear);
+
+var lastyear = thisdate.getFullYear()-1;
+
+document.writeln(lastyear);
+
+var twoyearsago = thisdate.getFullYear()-2;
+
+document.writeln(twoyearsago);
+
+document.writeln("<hr>");
+var testing = '';
+for (var i = 0; i < 6; i++) {
+  document.writeln(i);
+}
+
+var yearArray =new Array();
+document.writeln("<hr>");
+for(var i=0; i<6; i++){
+  yearArray.push( thisdate.getFullYear() - i );
+}
+  document.writeln(yearArray+"<br>");
+  document.writeln(yearArray[0]+"<br>");
+document.writeln("<hr>");
+
+document.writeln('<table cellpadding=10px border=1 style="border:1px solid red; color:blue;"><tr>')
+for (var i = 1; i <= 1000; i++) {
+    if( i % 10 == 1){
+      document.writeln("</tr>")
+    }
+    document.writeln("<td align=right>"+i+"</td>");
+    if( i % 10== 0){
+      document.writeln("</tr>")
+    }
+}
+document.writeln('</tr></table>')
+
+
+document.writeln("</p>");
+</script>

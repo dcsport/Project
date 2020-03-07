@@ -1,0 +1,282 @@
+<!doctype HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<!--	<meta name="viewport" content="initial-scale=1.0, width=device-width"/> -->
+    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>  -->
+<!--	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+<style>
+table{font-size:0.7rem;}
+a    {color:Yellow;}
+th   {width:100px;}
+form{
+	display:inline-block;
+	margin:4px 2px 4px 2px;
+}
+</style>
+<script>
+    function fixDataOnWheel(){
+        if(event.wheelDelta < 0){
+            DataScroll.doScroll('scrollbarDown');
+        }else{
+            DataScroll.doScroll('scrollbarUp');
+        }
+        dataOnScroll()
+    }
+    function dataOnScroll() {
+        left_contents.scrollTop = right_contents.scrollTop;
+        right_header.scrollLeft = right_contents.scrollLeft;
+    }
+</script>
+</head>
+<body class="bg-secondary">
+<?php
+$conn = mysqli_connect("122.35.69.36","happycall","hc9082534","happycalldb","3307");
+$year_A = Date('Y');
+$year_B = Date('Y',strtotime('-1 years'));
+$year_C = Date('Y',strtotime('-2 years'));
+$year_D = Date('Y',strtotime('-3 years'));
+$year_E = Date('Y',strtotime('-4 years'));
+$year_F = Date('Y',strtotime('-5 years'));
+
+if( empty($_GET['companycode'])  ){
+?>
+<a href="http://122.35.69.36/xe/index.php?mid=page_XZwu22" class="btn btn-danger"><h1>BACK TO MAIN PAGE</h1></a>
+<br><br>
+<?php
+	echo "<div class='btn btn-danger btn-block' style='height:200px; font-size:3rem;'>조회할 회사가 선택되지 않았습니다 회사를 클릭해주세요</div>";
+}
+	else{
+$companyname=$_GET['companyname'];
+$companycode=$_GET['companycode'];
+$product_code='';
+$product_sql = "SELECT `품목코드` from buy where 코드 = $companycode group by `품목코드` order by `품명`";
+$product_query=mysqli_query($conn,$product_sql);
+
+while($product_result=mysqli_fetch_row($product_query)){
+	$product_code .="$product_result[0]".',';
+}
+	$product_code = substr($product_code, 0, -1);
+
+// echo $product_code."<br>";
+
+/*
+while($product_result=mysqli_fetch_row($product_query)){
+	$product_code .='품목코드='.$product_result[0].' or ';
+}
+	$product_code = substr($product_code, 0, -3);
+echo $product_code."<br>";
+*/
+			$sell_sub_sql =
+			"
+			select * from ( select replace(replace(`품명`,' ',''),',',''),`품목코드`,`거래처명`,`코드`,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-01' then 공급가액 else 0 end) month01,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-02' then 공급가액 else 0 end) month02,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-03' then 공급가액 else 0 end) month03,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-04' then 공급가액 else 0 end) month04,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-05' then 공급가액 else 0 end) month05,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-06' then 공급가액 else 0 end) month06,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-07' then 공급가액 else 0 end) month07,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-08' then 공급가액 else 0 end) month08,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-09' then 공급가액 else 0 end) month09,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-10' then 공급가액 else 0 end) month10,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-11' then 공급가액 else 0 end) month11,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_C-12' then 공급가액 else 0 end) month12,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y'))) = '$year_C' then 공급가액 else 0 end) monthsub01,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-01' then 공급가액 else 0 end) month13,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-02' then 공급가액 else 0 end) month14,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-03' then 공급가액 else 0 end) month15,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-04' then 공급가액 else 0 end) month16,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-05' then 공급가액 else 0 end) month17,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-06' then 공급가액 else 0 end) month18,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-07' then 공급가액 else 0 end) month19,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-08' then 공급가액 else 0 end) month20,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-09' then 공급가액 else 0 end) month21,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-10' then 공급가액 else 0 end) month22,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-11' then 공급가액 else 0 end) month23,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_B-12' then 공급가액 else 0 end) month24,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y'))) = '$year_B' then 공급가액 else 0 end) monthsub02,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-01' then 공급가액 else 0 end) month25,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-02' then 공급가액 else 0 end) month26,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-03' then 공급가액 else 0 end) month27,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-04' then 공급가액 else 0 end) month28,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-05' then 공급가액 else 0 end) month29,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-06' then 공급가액 else 0 end) month30,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-07' then 공급가액 else 0 end) month31,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-08' then 공급가액 else 0 end) month32,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-09' then 공급가액 else 0 end) month33,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-10' then 공급가액 else 0 end) month34,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-11' then 공급가액 else 0 end) month35,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y-%m'))) = '$year_A-12' then 공급가액 else 0 end) month36,
+			sum(case when ((date_format((convert(concat(연도,'-',`월-일`),date)),'%Y'))) = '$year_A' then 공급가액 else 0 end) monthsub03,
+			sum(case when `연도` between '$year_C' and '$year_A' then 공급가액 else 0 end) total
+			from (select * from sell where `코드` is not null and 거래처명 not in ('','실험비','자재소모','잡손실','샘플비','재고자산감모손실','선수금','출고착오수정','폐기') order by id desc) as A
+			where `품목코드` in ($product_code) group by 품목코드,코드 with rollup
+			having total not in ('0') ) as B
+			order by 품목코드 is null, 품목코드, 코드 is null , monthsub02 desc
+			";
+			$sell_sub_query=mysqli_query($conn,$sell_sub_sql); // title table
+			$sell_sub_query2=mysqli_query($conn,$sell_sub_sql); // contents table
+			?>
+
+<a href="http://122.35.69.36/xe/index.php?mid=page_XZwu22" class="btn btn-danger"><h1>BACK TO MAIN PAGE</h1></a>
+<?php
+echo "<div style='color:Yellow; font-size:2rem;'>Supplier : ". $companyname." CODE :".$companycode."  3년 업체별 매출 현황 입니다.</div>" ;
+?>
+
+<table width="1450px" height="600px" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td width="300" valign="top">
+            <!-- LEFT HEADER(FIXED) START -->
+            <div id="left_header" style="width:100%; overflow-x:hidden; overflow-y:hidden;">
+                <table width="100%" cellspacing="0" cellpadding="3" border="1" style="table-layout:fixed; background-color:black; color:white; border:1px solid white;">
+                    <tr>
+                        <td colspan=2><?=$companyname ?> 매출</td>
+					</tr>
+					<tr>
+                        <th>품명</th><th>거래처명</th>
+                    </tr>
+                </table>
+            </div>
+            <!-- LEFT HEADER(FIXED) END-->
+
+            <!-- LEFT CONTENTS(FIXED) START-->
+            <div id="left_contents" style=" height:542px; overflow-x:hidden; overflow-y:hidden;" onmousewheel="fixDataOnWheel()" onScroll="dataOnScroll()">
+<!--                <table id="forRowspan" width="100%" height="540px"  cellspacing="0" cellpadding="0" border="1" style="table-layout:fixed; background-color:black; color:white; border:1px solid white;"> -->
+                <table id="forRowspan" width="100%" cellspacing="0" cellpadding="3" border="1" style="table-layout:fixed; background-color:black; color:white; border:1px solid white;">
+						<?php
+						while($sell_sub_result=mysqli_fetch_row($sell_sub_query)){
+						?>
+							<tr>
+							<?php
+									 if( $sell_sub_result[3] != null && $sell_sub_result[1] != null ){echo "<td style='white-space: nowrap; overflow: hidden;'><b><a href='./salesbusiness/salesbusiness_materal_sub.php?mateno=".$sell_sub_result[1]."'>".strtoupper($sell_sub_result[0])."</a></b></td><td style='white-space: nowrap; overflow: hidden;'><a href='./salesbusiness/salesbusiness_company_sub.php?mateno=".$sell_sub_result[1]."&companyno=".$sell_sub_result[3]."'><b>".$sell_sub_result[2]."</b></a></td>";        }
+								else if( $sell_sub_result[3] == null && $sell_sub_result[1] != null ){echo "<td style='white-space: nowrap; overflow: hidden;' colspan='2' class='text-white bg-info'>부분합 : <a href='./salesbusiness_materal_sub.php?mateno=".$sell_sub_result[1]."'><b>".$sell_sub_result[0]."</b></a></td>";}
+								else   {echo "<td style='white-space: nowrap; overflow: hidden;' colspan='2' class='bg-danger'>". $companyname ." 합 계 </td>";}
+							?>
+							</tr>
+						<?php
+						}
+						?>
+                </table>
+            </div>
+            <!-- LEFT CONTENTS(FIXED) END-->
+        </td>
+        <td width="*" valign="top">
+            <!-- RIGHT HEADER(CROSSTAB) START -->
+            <!--scroll 20px 35px block start-->
+        <div style="float:right; width:20px; height:35px;"></div>
+            <!--scroll 20px 35px block end-->
+            <div id="right_header" style="width:1123px; overflow-x:hidden; overflow-y:hidden;">
+                <table width="250%" cellspacing="0" cellpadding="3" border="1" style="table-layout:fixed; background-color:black; color:white; border:1px solid white;">
+					<tr>
+						<td colspan=13><?=$year_C?>년 매출</td><td colspan=13><?=$year_B?>년 매출</td><td colspan=13><?=$year_A?>년 매출</td>
+					</tr>
+					<tr>
+					<?php
+						for($l=$year_C; $l<=$year_A; $l++){
+								for($k=1; $k<13; $k++){
+									?>
+									<th><?=$l?>-<?=$k?>월</th>
+									<?php
+								}
+							?> <th><?=$l?>합계</th> <?php
+						}
+					?>
+					</tr>
+                </table>
+            </div>
+            <!-- RIGHT HEADER(CROSSTAB) END -->
+
+            <!-- RIGHT CONTENTS(CROSSTAB) START -->
+            <div id="right_contents" style="width:1140px; height:560px; overflow-x:scroll; overflow-y:scroll;" onScroll="dataOnScroll()">
+
+                <table width="250%" cellspacing="0" cellpadding="3" border="1" style="table-layout:fixed; background-color:#585858; color:white; border:1px solid white;">
+						<?php
+						while($sell_sub_result2=mysqli_fetch_row($sell_sub_query2)){
+						?>
+							<tr>
+							<?php
+										for($j=4;$j<43;$j++){
+												 if( $sell_sub_result2[3] != null && $sell_sub_result2[1] != null ){
+												 if( $sell_sub_result2[$j] != 0){echo "<td align='right' >".number_format($sell_sub_result2[$j],0)."</td>";}else{echo "<td></td>";}
+											}
+											else if( $sell_sub_result2[3] == null && $sell_sub_result2[1] != null ){
+												 if( $sell_sub_result2[$j] != 0){echo "<td align='right' class='text-dark bg-warning'>".number_format($sell_sub_result2[$j],0)."</td>";}else{echo "<td class='bg-warning'></td>";}
+											}
+											else   {
+												 if( $sell_sub_result2[$j] != 0){echo "<td align='right' class='bg-danger'>".number_format($sell_sub_result2[$j],0)."</td>";}else{echo "<td class='bg-danger'></td>";}
+											}
+										}
+							?>
+							</tr>
+						<?php
+						}
+						?>
+                </table>
+            </div>
+            <!-- RIGHT CONTENTS(CROSSTAB) END -->
+        </td>
+    </tr>
+</table>
+<br>
+		<?php
+		}
+
+$manufacture_sql="select * from (select `코드`,replace(replace(replace(거래처명,'(주)',''),'주식회사',''),' ','')as cname from buy where 거래처명 not in ('','제품생산','잡수입','선입고','재고보정','실험비','자재소모','잡손실','샘플비','재고자산감모손실','선수금','출고착오수정','폐기') and `연도` between $year_C and $year_A  order by id desc limit 1000000000) as A  group by A.cname order by A.cname";
+$manufacture_query=mysqli_query($conn,$manufacture_sql);
+$manufacture_number=mysqli_num_rows($manufacture_query);
+$manufacture_code_array=array();
+$manufacture_name_array=array();
+while($manufacture_result=mysqli_fetch_row($manufacture_query)){
+	$manufacture_code_array[].=$manufacture_result[0];
+	$manufacture_name_array[].=$manufacture_result[1];
+}
+for($i=0; $i<$manufacture_number; $i++){
+?>
+	<form action="./salesbusiness.php" method="get">
+	<input type="hidden" name="companycode" value="<?=$manufacture_code_array[$i]?>">
+	<input type="hidden" name="companyname" value="<?=$manufacture_name_array[$i]?>">
+		<?php
+		if( $manufacture_name_array[$i] == 'IWAKI' || $manufacture_name_array[$i] == 'ToshinKAGAKU' || $manufacture_name_array[$i] == '엘지생활건강' ){
+			?>
+				<button class="btn btn-danger" type="submit"><b><?=$manufacture_name_array[$i]?></b></button>
+	<!--			<input class="btn btn-danger" type="submit" value="<?=$manufacture_name_array[$i]?>"> -->
+			<?php
+			}else{
+			?>
+				<button class="btn btn-warning" type="submit"><b><?=$manufacture_name_array[$i]?></b></button>
+	<!--			<input class="btn btn-warning" type="submit" value="<?=$manufacture_name_array[$i]?>"> -->
+			<?php
+		}
+?>
+	</form>
+<?php
+}
+?>
+
+<script>
+$(function(){
+    $('#forRowspan').each(function() {
+        var table = this;
+        $.each([1] /* 합칠 칸 번호 */, function(c, v) {
+            var tds = $('>tbody>tr>td:nth-child(' + v + ')', table).toArray(), i = 0, j = 0;
+            for(j = 1; j < tds.length; j ++) {
+                if(tds[i].innerHTML != tds[j].innerHTML) {
+                    $(tds[i]).attr('rowspan', j - i);
+                    i = j;
+                    continue;
+                }
+                $(tds[j]).hide();
+            }
+            j --;
+            if(tds[i].innerHTML == tds[j].innerHTML) {
+                $(tds[i]).attr('rowspan', j - i + 1);
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>
